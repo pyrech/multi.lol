@@ -11,7 +11,7 @@
 
         <style type="text/css" media="screen">
             html, body { margin:0; width:100%; height:100%; overflow:hidden; }
-            .stat { position:absolute; z-index:10; top:0; left:0; padding:5px; background-color:#ffffff; color:#000000; }
+            .stat { position:absolute; z-index:10; top:0; left:0; font-size:0.8em; padding:5px; background-color:#ffffff; color:#000000; }
             #canvas { border:0 none; padding:0; margin:0; }
             #fallback { position:absolute; top:0; left:0; margin:0; width:100%; height:100%; }
             #fallback .lol { position:absolute; }
@@ -23,7 +23,10 @@
         </style>
     </head>
     <body>
-        <div class="stat"><span id="counter">0</span> lol</div>
+        <div class="stat">
+          <span id="counter">0</span> lol,
+          <span id="fps">0</span> lol/s
+        </div>
         
         <canvas id="canvas" width="500" height="400">
         </canvas>
@@ -49,8 +52,13 @@
                 /* Context for canvas */
                 "ctx": null,
 
-                /* Count of the number of lol */
+                /* Vars used for stats */
                 "count": 0,
+                "last_loop_date": null,
+                "mean_fps_on": 50,
+                "filter_strength": 20, // the higher this value, the less fps will reflect temporary variations
+                "frame_time": 0,
+                "last_loop": new Date,
 
                 /* Store the window size */
                 "max_x": window.innerWidth,
@@ -68,6 +76,7 @@
                 "init": function() {
                     /* Get HTML elts */
                     LOL.counter = document.getElementById("counter");
+                    LOL.fps = document.getElementById("fps");
                     LOL.canvas = document.getElementById('canvas');
                     LOL.player = document.getElementById("player");
 
@@ -75,6 +84,11 @@
                     LOL.launchPlayer();
                     setInterval(LOL.launchPlayer, 130000);
 
+                    /* Launches FPS refresh */
+                    setInterval(function(){
+                      LOL.fps.innerHTML = (1000/LOL.frameTime).toFixed(1);
+                    }, 1000);
+                    
                     /* Detects and launches the right mode */
                     if (!LOL.canvas.getContext) { 
                         LOL.fallback = document.getElementById('fallback');
@@ -149,9 +163,9 @@
                     /* Add the element to the container */
                     LOL.fallback.appendChild(tag);
 
-                    /* Update count */
-                    LOL.count = LOL.count+1;
-                    LOL.counter.innerHTML = LOL.count;
+                    /* Update stats */
+                    LOL.count++;
+                    LOL.updateStats();
                 },
 
                 /**
@@ -200,8 +214,22 @@
 
                     //LOL.ctx.restore();
                     
-                    /* Update count */
-                    LOL.count = LOL.count+1;
+                    /* Update stats */
+                    LOL.count++;
+                    LOL.updateStats();
+                },
+                
+                /**
+                 * Update the stats (Lol count and fps)
+                 */
+                "updateStats": function() {
+                    /* Calcules fps */
+                    var this_loop = new Date;
+                    var this_frame_time = this_loop - LOL.last_loop;
+                    LOL.frame_time += (this_frame_time - LOL.frame_time) / LOL.filter_strength;
+                    LOL.last_loop = this_loop;
+                    
+                    /* Draw the count stat (fps is automatically refreshed periodically) */
                     LOL.counter.innerHTML = LOL.count;
                 },
 
