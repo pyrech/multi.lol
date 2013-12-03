@@ -91,14 +91,20 @@
                     var font = LOL.rand(LOL.fonts);
                     var size = LOL.rand(LOL.sizes);
                     var weight = LOL.rand(LOL.weights);
-                    var a = LOL.rand(LOL.colors);
-                    var b = LOL.rand(LOL.colors);
-                    var c = LOL.rand(LOL.colors);
-                    var d = LOL.rand(LOL.colors);
-                    var e = LOL.rand(LOL.colors);
-                    var f = LOL.rand(LOL.colors);
+                    var r = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
+                    var g = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
+                    var b = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
                     var txt = LOL.get();
-                    LOL.content = LOL.content + '<span class="lol" style="font-family:'+font+'; font-size:'+size+'px; font-weight:'+weight+'; color:#'+a+b+c+d+e+f+'; top:'+y+'px; left:'+x+'px;">'+txt+'</span>';
+                    LOL.content = LOL.content + '<span class="lol" style="'
+                                                    + ' font-family:' + font + ';'
+                                                    + ' font-size:' + size + 'px;'
+                                                    + ' font-weight:' + weight + ';'
+                                                    + ' color:#' + r + g + b + ';'
+                                                    + ' top:' + y + 'px;'
+                                                    + ' left:' + x + 'px;">'
+                                                    + txt
+                                              + '</span>';
+
                     LOL.fallback.innerHTML = LOL.content;
                     LOL.count = LOL.count+1;
                     LOL.counter.innerHTML = LOL.count;
