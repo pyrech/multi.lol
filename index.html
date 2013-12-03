@@ -39,15 +39,27 @@
         
         <script>
             var LOL = {
+                /* HTML elts */
                 "canvas": null,
-                "ctx": null,
                 "fallback": null,
                 "counter": null,
+                "fps": null,
                 "player": null,
+
+                /* Context for canvas */
+                "ctx": null,
+
+                /* Content for fallback method */
                 "content": "",
+
+                /* Count of the number of lol */
                 "count": 0,
+
+                /* Store the window size */
                 "max_x": window.innerWidth,
                 "max_y": window.innerHeight,
+
+                /* Properties of strings to display */
                 "fonts": new Array ('Arial', 'Helvetica', 'sans-serif', "'Times New Roman'", 'Times', "'Liberation Serif'", 'FreeSerif', 'serif'),
                 "sizes": new Array (11, 13, 15, 17, 19, 21, 23, 25, 27, 29),
                 "weights": new Array (400, 700, 900),
@@ -57,11 +69,16 @@
                  * Init everything
                  */
                 "init": function() {
+                    /* Get HTML elts */
                     LOL.counter = document.getElementById("counter");
                     LOL.canvas = document.getElementById('canvas');
                     LOL.player = document.getElementById("player");
+
+                    /* Launches GrooveShark */
                     LOL.launchPlayer();
                     setInterval(LOL.launchPlayer, 130000);
+
+                    /* Detects and launches the right mode */
                     if (!LOL.canvas.getContext) { 
                         LOL.fallback = document.getElementById('fallback');
                         return setInterval(LOL.drawDom, 10);
@@ -99,14 +116,20 @@
                 "drawDom": function() {
                     LOL.max_x = window.innerWidth;
                     LOL.max_y = window.innerHeight;
+                    /* Get random properties for string to display */
+                    // Position
                     var x = Math.floor(Math.random()*(LOL.max_x-50));
                     var y = Math.floor(Math.random()*(LOL.max_y-60));
+                    // Font, size, weight
                     var font = LOL.rand(LOL.fonts);
                     var size = LOL.rand(LOL.sizes);
                     var weight = LOL.rand(LOL.weights);
+                    // Color
                     var r = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
                     var g = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
                     var b = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
+
+                    /* Get the LOL string and add the DOM element with the defined style */
                     var txt = LOL.getString();
                     LOL.content = LOL.content + '<span class="lol" style="'
                                                     + ' font-family:' + font + ';'
@@ -119,6 +142,8 @@
                                               + '</span>';
 
                     LOL.fallback.innerHTML = LOL.content;
+
+                    /* Update count */
                     LOL.count = LOL.count+1;
                     LOL.counter.innerHTML = LOL.count;
                 },
@@ -127,35 +152,55 @@
                  * Performs the animation using a canvas
                  */
                 "drawCanvas": function() {
+                    /* Get random properties for string to display */
+                    // Positions
                     var x = Math.floor(Math.random()*LOL.max_x-5);
                     var y = Math.floor(Math.random()*LOL.max_y+5);
+                    // Font, size, weight
                     var font = LOL.rand(LOL.fonts);
                     var size = LOL.rand(LOL.sizes);
                     var weight = LOL.rand(LOL.weights);
-                    //var angle = Math.random()*Math.PI/3;
-                    //angle = (angle >= Math.PI/6 ? angle : 2*Math.PI-angle);
+                    // Angle
+                    /*
+                    var angle = Math.random()*Math.PI/3;
+                    angle = (angle >= Math.PI/6 ? angle : 2*Math.PI-angle);
+                    */
+                    // Color
                     var r = Math.floor(Math.random()*256);
                     var g = Math.floor(Math.random()*256);
                     var b = Math.floor(Math.random()*256);
-                    //LOL.ctx.save();
-                    LOL.ctx.font = size+"pt "+font;
-                    LOL.ctx.fillStyle = "rgb("+r+","+g+","+b+")";
-                    var txt = LOL.getString();
-                    //var metric = LOL.ctx.measureText(txt);
-                    //var tx = x + (metric.width/2);
-                    //var ty = y + 5;
 
-                    //LOL.ctx.translate(tx,ty);
-                    //LOL.ctx.rotate(angle);
-                    //LOL.ctx.translate(-tx,-ty);
+                    /* Get the LOL string */
+                    var txt = LOL.getString();
+
+                    //LOL.ctx.save();
+                    
+                    /* Prepare the context with the choosen style */
+                    LOL.ctx.font = size + "pt " + font;
+                    LOL.ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+
+                    /* Rotate the string on its center */
+                    /*
+                    var metric = LOL.ctx.measureText(txt);
+                    var tx = x + (metric.width/2);
+                    var ty = y + 5;
+                    LOL.ctx.translate(tx,ty);
+                    LOL.ctx.rotate(angle);
+                    LOL.ctx.translate(-tx,-ty);
+                    */
+                    
+                    /* Draw the string to the correct position */
                     LOL.ctx.fillText(txt, x, y);
+                    
                     //LOL.ctx.restore();
+                    
+                    /* Update count */
                     LOL.count = LOL.count+1;
                     LOL.counter.innerHTML = LOL.count;
                 },
 
                 /**
-                 * Launch the GrooveShark player
+                 * Launches the GrooveShark player
                  */
                 "launchPlayer": function() {
                     LOL.player.innerHTML = '<object width="250" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="gsSong2947936670" name="gsSong2947936670">'
