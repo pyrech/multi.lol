@@ -49,9 +49,6 @@
                 /* Context for canvas */
                 "ctx": null,
 
-                /* Content for fallback method */
-                "content": "",
-
                 /* Count of the number of lol */
                 "count": 0,
 
@@ -137,19 +134,20 @@
                     var g = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
                     var b = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
 
-                    /* Get the LOL string and add the DOM element with the defined style */
+                    /* Get the LOL string and create the DOM element with the defined style */
                     var str = LOL.getString();
-                    LOL.content = LOL.content + '<span class="lol" style="'
-                                                    + ' font-family:' + font + ';'
-                                                    + ' font-size:' + size + 'px;'
-                                                    + ' font-weight:' + weight + ';'
-                                                    + ' color:#' + r + g + b + ';'
-                                                    + ' top:' + y + 'px;'
-                                                    + ' left:' + x + 'px;">'
-                                                    + str
-                                              + '</span>';
-
-                    LOL.fallback.innerHTML = LOL.content;
+                    var tag = document.createElement('span');
+                    tag.innerHTML = str;
+                    tag.setAttribute('class', 'lol');
+                    tag.setAttribute('style', 'font-family:' + font + ';'
+                                           + ' font-size:' + size + 'px;'
+                                           + ' font-weight:' + weight + ';'
+                                           + ' color:#' + r + g + b + ';'
+                                           + ' top:' + y + 'px;'
+                                           + ' left:' + x + 'px;');
+                                           
+                    /* Add the element to the container */
+                    LOL.fallback.appendChild(tag);
 
                     /* Update count */
                     LOL.count = LOL.count+1;
