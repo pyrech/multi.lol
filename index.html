@@ -100,13 +100,21 @@
                  * Return the string "LOL" with random number of "O"
                  */
                 "getString": function() {
-                    var txt = "L";
-                    var nb_o = (Math.random() < 0.95 ? 1 : 3);
+                    /* Find the number of O (1 is more often used than 4) */
+                    var rand = Math.random();
+                    var nb_o = 1;
+                    if (rand >= 0.95) nb_o = 4;
+                    else if (rand >= 0.85) nb_o = 3;
+                    else if (rand >= 0.65) nb_o = 2;
+                    
+                    /* Create the string */
+                    var str = "L";
                     for(var i=0; i<nb_o; i++) {
-                        txt = txt + "O";
+                        str = str + "O";
                     }
-                    txt = txt+"L";
-                    return txt;
+                    str = str+"L";
+                    
+                    return str;
                 },
 
                 /**
@@ -121,8 +129,8 @@
                     var x = Math.floor(Math.random()*(LOL.max_x));
                     var y = Math.floor(Math.random()*(LOL.max_y));
                     // Font, size, weight
-                    var font = LOL.rand(LOL.fonts);
-                    var size = LOL.rand(LOL.sizes);
+                    var font   = LOL.rand(LOL.fonts);
+                    var size   = LOL.rand(LOL.sizes);
                     var weight = LOL.rand(LOL.weights);
                     // Color
                     var r = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
@@ -130,7 +138,7 @@
                     var b = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
 
                     /* Get the LOL string and add the DOM element with the defined style */
-                    var txt = LOL.getString();
+                    var str = LOL.getString();
                     LOL.content = LOL.content + '<span class="lol" style="'
                                                     + ' font-family:' + font + ';'
                                                     + ' font-size:' + size + 'px;'
@@ -138,7 +146,7 @@
                                                     + ' color:#' + r + g + b + ';'
                                                     + ' top:' + y + 'px;'
                                                     + ' left:' + x + 'px;">'
-                                                    + txt
+                                                    + str
                                               + '</span>';
 
                     LOL.fallback.innerHTML = LOL.content;
@@ -157,8 +165,8 @@
                     var x = Math.floor(Math.random()*LOL.max_x-5);
                     var y = Math.floor(Math.random()*LOL.max_y+5);
                     // Font, size, weight
-                    var font = LOL.rand(LOL.fonts);
-                    var size = LOL.rand(LOL.sizes);
+                    var font   = LOL.rand(LOL.fonts);
+                    var size   = LOL.rand(LOL.sizes);
                     var weight = LOL.rand(LOL.weights);
                     // Angle
                     /*
@@ -171,7 +179,7 @@
                     var b = Math.floor(Math.random()*256);
 
                     /* Get the LOL string */
-                    var txt = LOL.getString();
+                    var str = LOL.getString();
 
                     //LOL.ctx.save();
                     
@@ -181,7 +189,7 @@
 
                     /* Rotate the string on its center */
                     /*
-                    var metric = LOL.ctx.measureText(txt);
+                    var metric = LOL.ctx.measureText(str);
                     var tx = x + (metric.width/2);
                     var ty = y + 5;
                     LOL.ctx.translate(tx,ty);
@@ -190,8 +198,8 @@
                     */
                     
                     /* Draw the string to the correct position */
-                    LOL.ctx.fillText(txt, x, y);
-                    
+                    LOL.ctx.fillText(str, x, y);
+
                     //LOL.ctx.restore();
                     
                     /* Update count */
