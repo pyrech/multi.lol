@@ -53,6 +53,9 @@
                 "weights": new Array (400, 700, 900),
                 "colors": new Array ('0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'),
 
+                /**
+                 * Init everything
+                 */
                 "init": function() {
                     LOL.counter = document.getElementById("counter");
                     LOL.canvas = document.getElementById('canvas');
@@ -69,10 +72,16 @@
                     return setInterval(LOL.draw, 10);
                 },
 
+                /**
+                 * Returns a random element of an array
+                 */
                 "rand": function(a) {
                     return a[Math.floor(Math.random()*a.length)];
                 },
 
+                /**
+                 * Return the string "LOL" with random number of "O"
+                 */
                 "get": function() {
                     var txt = "L";
                     var nb_o = (Math.random() < 0.95 ? 1 : 3);
@@ -83,6 +92,9 @@
                     return txt;
                 },
 
+                /**
+                 * Performs the animation using DOM elements.
+                 */
                 "old": function() {
                     LOL.max_x = window.innerWidth;
                     LOL.max_y = window.innerHeight;
@@ -110,6 +122,9 @@
                     LOL.counter.innerHTML = LOL.count;
                 },
 
+                /**
+                 * Performs the animation using a canvas
+                 */
                 "draw": function() {
                     var x = Math.floor(Math.random()*LOL.max_x-5);
                     var y = Math.floor(Math.random()*LOL.max_y+5);
@@ -138,10 +153,16 @@
                     LOL.counter.innerHTML = LOL.count;
                 },
 
+                /**
+                 * Launch the GrooveShark player
+                 */
                 "launchPlayer": function() {
                     LOL.player.innerHTML = '<object width="250" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="gsSong2947936670" name="gsSong2947936670"><param name="movie" value="http://grooveshark.com/songWidget.swf" /><param name="wmode" value="window" /><param name="allowScriptAccess" value="always" /><param name="flashvars" value="hostname=grooveshark.com&songID=29479366&style=metal&p=1" /><object type="application/x-shockwave-flash" data="http://grooveshark.com/songWidget.swf" width="250" height="40"><param name="wmode" value="window" /><param name="allowScriptAccess" value="always" /><param name="flashvars" value="hostname=grooveshark.com&songID=29479366&style=metal&p=1" /><span><a href="http://grooveshark.com/search/song?q=A%20trololol" title="trololol by A on Grooveshark">trololol by A on Grooveshark</a></span></object></object>';
                 },
 
+                /**
+                 * Allows to share on Twitter with the current score
+                 */
                 "onTwitterShare": function(elt) {
                     window.open(elt.href.replace('XX', LOL.count));
                 }
