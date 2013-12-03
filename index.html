@@ -161,9 +161,9 @@
                 },
 
                 /**
-                 * Allows to share on Twitter with the current score
+                 * Allows to share on social networks with the current score
                  */
-                "onTwitterShare": function(elt) {
+                "onShare": function(elt) {
                     window.open(elt.href.replace('XX', LOL.count));
                 }
             };
@@ -184,7 +184,7 @@
 
             
         <div id="custom-tweet-button">
-            <a href="https://twitter.com/share?url=http%3A%2F%2Fpolylol.fr&hashtags=LOL&text=I%20have%20lolled%20XX%20times%20on" onclick="LOL.onTwitterShare(this); return false;">Tweet</a>
+            <a href="https://twitter.com/share?url=http%3A%2F%2Fpolylol.fr&hashtags=LOL&text=I%20have%20lolled%20XX%20times%20on" onclick="LOL.onShare(this); return false;">Tweet</a>
         </div>
     </body>
 </html>
