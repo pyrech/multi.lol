@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="description" content="Polylol : the only way to get the power of lol" />
         <meta name="keywords" content="Lol, lol, polylol, polytech, power" />
@@ -12,10 +13,10 @@
         <style type="text/css" media="screen">
             html, body { margin:0; width:100%; height:100%; overflow:hidden; }
             .stat { position:absolute; z-index:10; top:0; left:0; font-size:0.8em; padding:5px; background-color:#ffffff; color:#000000; }
-            #canvas { border:0 none; padding:0; margin:0; }
+            #canvas { position:absolute; top:0; left:0; border:0 none; margin:0; padding:0; }
             #fallback { position:absolute; top:0; left:0; margin:0; width:100%; height:100%; }
             #fallback .lol { position:absolute; }
-            .central { position:absolute; top:0; line-height:100%; vertical-align:middle; z-index:10; width:100%; text-align:center; color:#ffffff; font-size:500px; font-weight:bold; font-family:serif; margin-top:0; }
+            #central { position:absolute; top:0; line-height:100%; vertical-align:middle; z-index:10; width:100%; text-align:center; color:#ffffff; font-weight:bold; font-family:serif; margin-top:0; }
             #player { position:absolute; top:0; left:-9999px; }
             #custom-tweet-button { position:absolute; bottom:10px; right:10px; color:#ffffff; z-index:10; }
             #custom-tweet-button a { background:url('/twitter.png') left center no-repeat; padding-left:40px; display:block; color:#ffffff; text-decoration:none; cursor:pointer; height:30px; line-height:30px; font-family:Arial; outline:none; }
@@ -28,13 +29,13 @@
           <span id="fps">0</span> lol/s
         </div>
         
-        <canvas id="canvas" width="500" height="400">
+        <canvas id="canvas">
         </canvas>
 
         <div id="fallback">
         </div>
         
-        <h1 class="central">LOL</h1>
+        <h1 id="central">LOL</h1>
         
         <div id="player">
         </div>
@@ -43,6 +44,7 @@
         <script>
             var LOL = {
                 /* HTML elts */
+                "central": null,
                 "canvas": null,
                 "fallback": null,
                 "counter": null,
@@ -78,6 +80,7 @@
                  */
                 "init": function() {
                     /* Get HTML elts */
+                    LOL.central = document.getElementById("central");
                     LOL.counter = document.getElementById("counter");
                     LOL.fps = document.getElementById("fps");
                     LOL.canvas = document.getElementById('canvas');
@@ -92,6 +95,8 @@
                       LOL.fps.innerHTML = (1000/LOL.frameTime).toFixed(1);
                     }, 1000);
 
+                    /* Handle window resize */
+                    window.onresize = LOL.onWindowResize;
 
                     /* Detect the mode and init the animation (canvas or DOM) */
                     if (!LOL.canvas.getContext) {
@@ -104,9 +109,37 @@
                         LOL.ctx = LOL.canvas.getContext('2d');
                         setInterval(LOL.drawCanvas, 10);
                     }
-
-                    LOL.canvas.width = window.innerWidth;
-                    LOL.canvas.height = window.innerHeight;
+                    LOL.onWindowResize();
+                },
+                
+                /**
+                 * Adapts the size of the animation to fit the window's dimension
+                 */
+                "onWindowResize": function() {
+                    var width = window.innerWidth;
+                    var height = window.innerHeight;
+                    
+                    /* Set the size of the canvas */
+                    if (LOL.mode_canvas) {
+                        var data = null;
+                        if (LOL.ctx) {
+                            data = LOL.ctx.getImageData(0, 0, width, height);
+                        }
+                        LOL.canvas.width = width;
+                        LOL.canvas.height = height;
+                        if (LOL.ctx) {
+                            LOL.ctx.putImageData(data, 0, 0);
+                        }
+                    }
+                    
+                    /* Set the font-size for the central LOL */
+                    var fpc = width/10;
+                    fpc = Math.round(fpc*100)/4;
+                    LOL.central.style.fontSize = fpc+'%';
+                    
+                    /* Set the max width and height for string's position */
+                    LOL.max_x = width;
+                    LOL.max_y = height;
                 },
 
                 /**
@@ -142,8 +175,6 @@
                  * Much slower than canvas but used as a fallback for older browser.
                  */
                 "drawDom": function() {
-                    LOL.max_x = window.innerWidth;
-                    LOL.max_y = window.innerHeight;
                     /* Get random properties for string to display */
                     // Position
                     var x = Math.floor(Math.random()*(LOL.max_x));
