@@ -48,6 +48,9 @@
                 "counter": null,
                 "fps": null,
                 "player": null,
+                
+                /* Mode : true => canvas, 0 => fallback via dom */
+                "mode_canvas": false,
 
                 /* Context for canvas */
                 "ctx": null,
@@ -88,16 +91,22 @@
                     setInterval(function(){
                       LOL.fps.innerHTML = (1000/LOL.frameTime).toFixed(1);
                     }, 1000);
-                    
-                    /* Detects and launches the right mode */
-                    if (!LOL.canvas.getContext) { 
+
+
+                    /* Detect the mode and init the animation (canvas or DOM) */
+                    if (!LOL.canvas.getContext) {
+                        LOL.mode_canvas = false;
                         LOL.fallback = document.getElementById('fallback');
-                        return setInterval(LOL.drawDom, 10);
+                        setInterval(LOL.drawDom, 10);
                     }
-                    LOL.ctx = LOL.canvas.getContext('2d');
+                    else {
+                        LOL.mode_canvas = true;
+                        LOL.ctx = LOL.canvas.getContext('2d');
+                        setInterval(LOL.drawCanvas, 10);
+                    }
+
                     LOL.canvas.width = window.innerWidth;
                     LOL.canvas.height = window.innerHeight;
-                    return setInterval(LOL.drawCanvas, 10);
                 },
 
                 /**
