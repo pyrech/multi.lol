@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta name="description" content="Polylol : the only way to get the power of lol" />
+        <meta name="keywords" content="Lol, lol, polylol, polytech, power" />
+        <meta name="author" content="Everybody" />
+
+        <title>Lol</title>
+
+        <style type="text/css" media="screen">
+            html, body { margin:0; width:100%; height:100%; overflow:hidden; }
+            .stat { position:absolute; z-index:10; top:0; left:0; font-size:0.8em; padding:5px; background-color:#ffffff; color:#000000; }
+            #canvas { position:absolute; top:0; left:0; border:0 none; margin:0; padding:0; }
+            #fallback { position:absolute; top:0; left:0; margin:0; width:100%; height:100%; }
+            #fallback .lol { position:absolute; }
+            #central { position:absolute; top:0; line-height:100%; vertical-align:middle; z-index:10; width:100%; text-align:center; color:#ffffff; font-weight:bold; font-family:serif; margin-top:0; }
+            #player { position:absolute; top:0; left:-9999px; }
+            #custom-tweet-button { position:absolute; bottom:10px; right:10px; color:#ffffff; z-index:10; }
+            #custom-tweet-button a { background:url('/twitter.png') left center no-repeat; padding-left:40px; display:block; color:#ffffff; text-decoration:none; cursor:pointer; height:30px; line-height:30px; font-family:Arial; outline:none; }
+            #custom-tweet-button a:hover { text-decoration:underline; outline:none; }
+        </style>
+    </head>
+    <body>
+        <div class="stat">
+          <span id="counter">0</span> lol,
+          <span id="fps">0</span> lol/s
+        </div>
+        
+        <canvas id="canvas">
+        </canvas>
+
+        <div id="fallback">
+        </div>
+        
+        <h1 id="central">LOL</h1>
+        
+        <div id="player">
+        </div>
+
+        
+        <script>
+            var LOL = {
+                /* HTML elts */
+                "central": null,
+                "canvas": null,
+                "fallback": null,
+                "counter": null,
+                "fps": null,
+                "player": null,
+                
+                /* Mode : true => canvas, 0 => fallback via dom */
+                "mode_canvas": false,
+
+                /* Context for canvas */
+                "ctx": null,
+
+                /* Vars used for stats */
+                "count": 0,
+                "last_loop_date": null,
+                "mean_fps_on": 50,
+                "filter_strength": 20, // the higher this value, the less fps will reflect temporary variations
+                "frame_time": 0,
+                "last_loop": new Date,
+
+                /* Store the window size */
+                "max_x": window.innerWidth,
+                "max_y": window.innerHeight,
+
+                /* Properties of strings to display */
+                "fonts": new Array ('Arial', 'Helvetica', 'sans-serif', "'Times New Roman'", 'Times', "'Liberation Serif'", 'FreeSerif', 'serif'),
+                "sizes": new Array (11, 13, 15, 17, 19, 21, 23, 25, 27, 29),
+                "weights": new Array (400, 700, 900),
+                "colors": new Array ('0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'),
+
+                /**
+                 * Init everything
+                 */
+                "init": function() {
+                    /* Get HTML elts */
+                    LOL.central = document.getElementById("central");
+                    LOL.counter = document.getElementById("counter");
+                    LOL.fps = document.getElementById("fps");
+                    LOL.canvas = document.getElementById('canvas');
+                    LOL.player = document.getElementById("player");
+
+                    /* Launches GrooveShark */
+                    LOL.launchPlayer();
+                    setInterval(LOL.launchPlayer, 130000);
+
+                    /* Launches FPS refresh */
+                    setInterval(function(){
+                      LOL.fps.innerHTML = (1000/LOL.frameTime).toFixed(1);
+                    }, 1000);
+
+                    /* Handle window resize */
+                    window.onresize = LOL.onWindowResize;
+
+                    /* Detect the mode and init the animation (canvas or DOM) */
+                    if (!LOL.canvas.getContext) {
+                        LOL.mode_canvas = false;
+                        LOL.fallback = document.getElementById('fallback');
+                        setInterval(LOL.drawDom, 10);
+                    }
+                    else {
+                        LOL.mode_canvas = true;
+                        LOL.ctx = LOL.canvas.getContext('2d');
+                        setInterval(LOL.drawCanvas, 10);
+                    }
+                    LOL.onWindowResize();
+                },
+                
+                /**
+                 * Adapts the size of the animation to fit the window's dimension
+                 */
+                "onWindowResize": function() {
+                    var width = window.innerWidth;
+                    var height = window.innerHeight;
+                    
+                    /* Set the size of the canvas */
+                    if (LOL.mode_canvas) {
+                        var data = null;
+                        if (LOL.ctx) {
+                            data = LOL.ctx.getImageData(0, 0, width, height);
+                        }
+                        LOL.canvas.width = width;
+                        LOL.canvas.height = height;
+                        if (LOL.ctx) {
+                            LOL.ctx.putImageData(data, 0, 0);
+                        }
+                    }
+                    
+                    /* Set the font-size for the central LOL */
+                    var fpc = width/10;
+                    fpc = Math.round(fpc*100)/4;
+                    LOL.central.style.fontSize = fpc+'%';
+                    
+                    /* Set the max width and height for string's position */
+                    LOL.max_x = width;
+                    LOL.max_y = height;
+                },
+
+                /**
+                 * Returns a random element of an array
+                 */
+                "rand": function(a) {
+                    return a[Math.floor(Math.random()*a.length)];
+                },
+
+                /**
+                 * Return the string "LOL" with random number of "O"
+                 */
+                "getString": function() {
+                    /* Find the number of O (1 is more often used than 4) */
+                    var rand = Math.random();
+                    var nb_o = 1;
+                    if (rand >= 0.95) nb_o = 4;
+                    else if (rand >= 0.85) nb_o = 3;
+                    else if (rand >= 0.65) nb_o = 2;
+                    
+                    /* Create the string */
+                    var str = "L";
+                    for(var i=0; i<nb_o; i++) {
+                        str = str + "O";
+                    }
+                    str = str+"L";
+                    
+                    return str;
+                },
+
+                /**
+                 * Performs the animation using DOM elements.
+                 * Much slower than canvas but used as a fallback for older browser.
+                 */
+                "drawDom": function() {
+                    /* Get random properties for string to display */
+                    // Position
+                    var x = Math.floor(Math.random()*(LOL.max_x));
+                    var y = Math.floor(Math.random()*(LOL.max_y));
+                    // Font, size, weight
+                    var font   = LOL.rand(LOL.fonts);
+                    var size   = LOL.rand(LOL.sizes);
+                    var weight = LOL.rand(LOL.weights);
+                    // Color
+                    var r = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
+                    var g = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
+                    var b = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
+
+                    /* Get the LOL string and create the DOM element with the defined style */
+                    var str = LOL.getString();
+                    var tag = document.createElement('span');
+                    tag.innerHTML = str;
+                    tag.setAttribute('class', 'lol');
+                    tag.setAttribute('style', 'font-family:' + font + ';'
+                                           + ' font-size:' + size + 'px;'
+                                           + ' font-weight:' + weight + ';'
+                                           + ' color:#' + r + g + b + ';'
+                                           + ' top:' + y + 'px;'
+                                           + ' left:' + x + 'px;');
+                                           
+                    /* Add the element to the container */
+                    LOL.fallback.appendChild(tag);
+
+                    /* Update stats */
+                    LOL.count++;
+                    LOL.updateStats();
+                },
+
+                /**
+                 * Performs the animation using a canvas
+                 */
+                "drawCanvas": function() {
+                    /* Get random properties for string to display */
+                    // Positions
+                    var x = Math.floor(Math.random()*LOL.max_x-5);
+                    var y = Math.floor(Math.random()*LOL.max_y+5);
+                    // Font, size, weight
+                    var font   = LOL.rand(LOL.fonts);
+                    var size   = LOL.rand(LOL.sizes);
+                    var weight = LOL.rand(LOL.weights);
+                    // Angle
+                    /*
+                    var angle = Math.random()*Math.PI/3;
+                    angle = (angle >= Math.PI/6 ? angle : 2*Math.PI-angle);
+                    */
+                    // Color
+                    var r = Math.floor(Math.random()*256);
+                    var g = Math.floor(Math.random()*256);
+                    var b = Math.floor(Math.random()*256);
+
+                    /* Get the LOL string */
+                    var str = LOL.getString();
+
+                    //LOL.ctx.save();
+                    
+                    /* Prepare the context with the choosen style */
+                    LOL.ctx.font = size + "pt " + font;
+                    LOL.ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+
+                    /* Rotate the string on its center */
+                    /*
+                    var metric = LOL.ctx.measureText(str);
+                    var tx = x + (metric.width/2);
+                    var ty = y + 5;
+                    LOL.ctx.translate(tx,ty);
+                    LOL.ctx.rotate(angle);
+                    LOL.ctx.translate(-tx,-ty);
+                    */
+                    
+                    /* Draw the string to the correct position */
+                    LOL.ctx.fillText(str, x, y);
+
+                    //LOL.ctx.restore();
+                    
+                    /* Update stats */
+                    LOL.count++;
+                    LOL.updateStats();
+                },
+                
+                /**
+                 * Update the stats (Lol count and fps)
+                 */
+                "updateStats": function() {
+                    /* Calcules fps */
+                    var this_loop = new Date;
+                    var this_frame_time = this_loop - LOL.last_loop;
+                    LOL.frame_time += (this_frame_time - LOL.frame_time) / LOL.filter_strength;
+                    LOL.last_loop = this_loop;
+                    
+                    /* Draw the count stat (fps is automatically refreshed periodically) */
+                    LOL.counter.innerHTML = LOL.count;
+                },
+
+                /**
+                 * Launches the GrooveShark player
+                 */
+                "launchPlayer": function() {
+                    LOL.player.innerHTML = '<object width="250" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="gsSong2947936670" name="gsSong2947936670">'
+                                             + '<param name="movie" value="http://grooveshark.com/songWidget.swf" />'
+                                             + '<param name="wmode" value="window" />'
+                                             + '<param name="allowScriptAccess" value="always" />'
+                                             + '<param name="flashvars" value="hostname=grooveshark.com&songID=29479366&style=metal&p=1" />'
+                                             + '<object type="application/x-shockwave-flash" data="http://grooveshark.com/songWidget.swf" width="250" height="40">'
+                                                 + '<param name="wmode" value="window" />'
+                                                 + '<param name="allowScriptAccess" value="always" />'
+                                                 + '<param name="flashvars" value="hostname=grooveshark.com&songID=29479366&style=metal&p=1" />'
+                                                 + '<span><a href="http://grooveshark.com/search/song?q=A%20trololol" title="trololol by A on Grooveshark">trololol by A on Grooveshark</a></span>'
+                                             + '</object>'
+                                         + '</object>';
+                },
+
+                /**
+                 * Allows to share on social networks with the current score
+                 */
+                "onShare": function(elt) {
+                    window.open(elt.href.replace('XX', LOL.count));
+                }
+            };
+
+            LOL.init();
+        </script>
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-36557620-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
+
+            
+        <div id="custom-tweet-button">
+            <a href="https://twitter.com/share?url=http%3A%2F%2Fpolylol.fr&hashtags=LOL&text=I%20have%20lolled%20XX%20times%20on" onclick="LOL.onShare(this); return false;">Tweet</a>
+        </div>
+    </body>
+</html>
