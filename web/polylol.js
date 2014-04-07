@@ -1,3 +1,4 @@
+
 var LOL = {
     /* HTML elts */
     "central": null,
@@ -42,34 +43,58 @@ var LOL = {
         LOL.canvas = document.getElementById('canvas');
         LOL.player = document.getElementById("player");
 
-        /* Launches GrooveShark */
+        /* Launch GrooveShark */
         LOL.launchPlayer();
         setInterval(LOL.launchPlayer, 130000);
 
-        /* Launches FPS refresh */
+        /* Launch FPS refresh */
         setInterval(function(){
           LOL.fps.innerHTML = (1000/LOL.frame_time).toFixed(1);
         }, 1000);
 
         /* Handle window resize */
         window.onresize = LOL.onWindowResize;
+        
+        /* Handle mouse move */
+        window.onmousemove = function(event){
+            if(window.event)
+                event = window.event; //grrr IE
+            var x = event.clientX;
+            var y = event.clientY;
+            if (LOL.mode_canvas) {
+                LOL.drawCanvas(x, y);
+            }
+            else {
+                LOL.drawDom(x, y);
+            }
+        };
 
         /* Detect the mode and init the animation (canvas or DOM) */
         if (!LOL.canvas.getContext) {
             LOL.mode_canvas = false;
             LOL.fallback = document.getElementById('fallback');
-            setInterval(LOL.drawDom, 10);
+            setInterval(function() {
+                var x = Math.floor(Math.random()*(LOL.max_x));
+                var y = Math.floor(Math.random()*(LOL.max_y));
+                LOL.drawDom(x, y);
+                LOL.calculFps();
+            }, 10);
         }
         else {
             LOL.mode_canvas = true;
             LOL.ctx = LOL.canvas.getContext('2d');
-            setInterval(LOL.drawCanvas, 10);
+            setInterval(function() {
+                var x = Math.floor(Math.random()*LOL.max_x-5);
+                var y = Math.floor(Math.random()*LOL.max_y+5);
+                LOL.drawCanvas(x, y);
+                LOL.calculFps();
+            }, 10);
         }
         LOL.onWindowResize();
     },
     
     /**
-     * Adapts the size of the animation to fit the window's dimension
+     * Adapt the size of the animation to fit the window's dimension
      */
     "onWindowResize": function() {
         var width = window.innerWidth;
@@ -99,7 +124,7 @@ var LOL = {
     },
 
     /**
-     * Returns a random element of an array
+     * Return a random element of an array
      */
     "rand": function(a) {
         return a[Math.floor(Math.random()*a.length)];
@@ -127,17 +152,14 @@ var LOL = {
     },
 
     /**
-     * Performs the animation using DOM elements.
+     * Perform the animation using DOM elements.
      * Much slower than canvas but used as a fallback for older browser.
      */
-    "drawDom": function() {
+    "drawDom": function(x, y) {
         /* Get random properties for string to display */
-        // Position
-        var x = Math.floor(Math.random()*(LOL.max_x));
-        var y = Math.floor(Math.random()*(LOL.max_y));
         // Font, size, weight
-        var font = LOL.rand(LOL.fonts);
-        var size = LOL.rand(LOL.sizes);
+        var font   = LOL.rand(LOL.fonts);
+        var size   = LOL.rand(LOL.sizes);
         var weight = LOL.rand(LOL.weights);
         // Color
         var r = LOL.rand(LOL.colors) + LOL.rand(LOL.colors);
@@ -158,23 +180,18 @@ var LOL = {
                                
         /* Add the element to the container */
         LOL.fallback.appendChild(tag);
-
-        /* Update stats */
-        LOL.count++;
-        LOL.updateStats();
+        
+        LOL.updateCount();
     },
 
     /**
-     * Performs the animation using a canvas
+     * Perform the animation using a canvas
      */
-    "drawCanvas": function() {
+    "drawCanvas": function(x, y) {
         /* Get random properties for string to display */
-        // Positions
-        var x = Math.floor(Math.random()*LOL.max_x-5);
-        var y = Math.floor(Math.random()*LOL.max_y+5);
         // Font, size, weight
-        var font = LOL.rand(LOL.fonts);
-        var size = LOL.rand(LOL.sizes);
+        var font   = LOL.rand(LOL.fonts);
+        var size   = LOL.rand(LOL.sizes);
         var weight = LOL.rand(LOL.weights);
         // Angle
         /*
@@ -210,27 +227,29 @@ var LOL = {
 
         //LOL.ctx.restore();
         
-        /* Update stats */
-        LOL.count++;
-        LOL.updateStats();
+        LOL.updateCount();
     },
-                
+    
     /**
-     * Update the stats (Lol count and fps)
+     * Draw the count value
      */
-    "updateStats": function() {
-        /* Calcules fps */
+    "updateCount": function() {
+        LOL.count++;
+        LOL.counter.innerHTML = LOL.count;
+    },
+    
+    /**
+     * Calcul FPS values
+     */
+    "calculFps": function() {
         var this_loop = new Date;
         var this_frame_time = this_loop - LOL.last_loop;
         LOL.frame_time += (this_frame_time - LOL.frame_time) / LOL.filter_strength;
         LOL.last_loop = this_loop;
-        
-        /* Draw the count stat (fps is automatically refreshed periodically) */
-        LOL.counter.innerHTML = LOL.count;
     },
 
     /**
-     * Launches the GrooveShark player
+     * Launch the GrooveShark player
      */
     "launchPlayer": function() {
         LOL.player.innerHTML = '<object width="250" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="gsSong2947936670" name="gsSong2947936670">'
@@ -248,7 +267,7 @@ var LOL = {
     },
 
     /**
-     * Allows to share on social networks with the current score
+     * Allow to share on social networks with the current score
      */
     "onShare": function(elt) {
         window.open(elt.href.replace('XX', LOL.count));
