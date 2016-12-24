@@ -7,7 +7,7 @@ var LOL = {
     "counter": null,
     "fps": null,
     "player": null,
-    
+
     /* Mode : true => canvas, false => fallback via dom */
     "mode_canvas": false,
 
@@ -54,7 +54,7 @@ var LOL = {
 
         /* Handle window resize */
         window.onresize = LOL.onWindowResize;
-        
+
         /* Handle mouse move */
         window.onmousemove = function(event){
             if(window.event)
@@ -92,14 +92,14 @@ var LOL = {
         }
         LOL.onWindowResize();
     },
-    
+
     /**
      * Adapt the size of the animation to fit the window's dimension
      */
     "onWindowResize": function() {
         var width = window.innerWidth;
         var height = window.innerHeight;
-        
+
         /* Set the size of the canvas */
         if (LOL.mode_canvas) {
             var data = null;
@@ -112,12 +112,12 @@ var LOL = {
                 LOL.ctx.putImageData(data, 0, 0);
             }
         }
-        
+
         /* Set the font-size for the central LOL */
         var fpc = width/10;
         fpc = Math.round(fpc*100)/4;
         LOL.central.style.fontSize = fpc+'%';
-        
+
         /* Set the max width and height for string's position */
         LOL.max_x = width;
         LOL.max_y = height;
@@ -140,14 +140,14 @@ var LOL = {
         if (rand >= 0.95) nb_o = 4;
         else if (rand >= 0.85) nb_o = 3;
         else if (rand >= 0.65) nb_o = 2;
-        
+
         /* Create the string */
         var str = "L";
         for(var i=0; i<nb_o; i++) {
             str = str + "O";
         }
         str = str+"L";
-        
+
         return str;
     },
 
@@ -177,10 +177,10 @@ var LOL = {
                                + ' color:#' + r + g + b + ';'
                                + ' top:' + y + 'px;'
                                + ' left:' + x + 'px;');
-                               
+
         /* Add the element to the container */
         LOL.fallback.appendChild(tag);
-        
+
         LOL.updateCount();
     },
 
@@ -207,7 +207,7 @@ var LOL = {
         var str = LOL.getString();
 
         //LOL.ctx.save();
-        
+
         /* Prepare the context with the choosen style */
         LOL.ctx.font = size + "pt " + font;
         LOL.ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
@@ -221,15 +221,15 @@ var LOL = {
         LOL.ctx.rotate(angle);
         LOL.ctx.translate(-tx,-ty);
         */
-        
+
         /* Draw the string to the correct position */
         LOL.ctx.fillText(str, x, y);
 
         //LOL.ctx.restore();
-        
+
         LOL.updateCount();
     },
-    
+
     /**
      * Draw the count value
      */
@@ -237,7 +237,7 @@ var LOL = {
         LOL.count++;
         LOL.counter.innerHTML = LOL.count;
     },
-    
+
     /**
      * Calcul FPS values
      */
