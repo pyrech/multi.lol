@@ -1,4 +1,3 @@
-
 var LOL = {
     /* HTML elts */
     "central": null,
