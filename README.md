@@ -1,6 +1,6 @@
-# multi.lol
+# Lol
 
-A useless website.
+A useless website: [lol.loickpiera.com](https://lol.loickpiera.com) (previously hosted on multi.lol)
 
 It features a canvas where hundred, thousand and more, "LOL" are drawn in a great ambiance :)
 
